@@ -496,9 +496,6 @@ An experimental natural-language search feature was intentionally left out of th
 
 # ⚠️ Known Limitations
 
-* **No PDF Export**
-  Challans are currently viewed through the detail UI and cannot be exported as PDFs.
-
 * **Session Expiry Notification**
   JWT tokens expire after 8 hours. The application redirects users to login after expiry but does not currently provide an advance warning.
 
@@ -511,7 +508,6 @@ An experimental natural-language search feature was intentionally left out of th
 
 Potential extensions include:
 
-* PDF challan generation
 * Low-stock alerts
 * Advanced sales analytics
 * Invoice generation

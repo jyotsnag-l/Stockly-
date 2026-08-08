@@ -20,8 +20,10 @@ import {
   AlertCircle, 
   Edit,
   Truck,
-  HelpCircle
+  HelpCircle,
+  Download
 } from 'lucide-react';
+import { exportChallanToPDF } from '../utils/pdfGenerator';
 
 export default function ChallanDetail() {
   const { id } = useParams<{ id: string }>();
@@ -150,38 +152,48 @@ export default function ChallanDetail() {
         </button>
 
         {/* Action Buttons Panel */}
-        {isWritable && (
-          <div className="flex items-center gap-2">
-            {challan.status === 'Draft' && (
-              <>
-                <button
-                  onClick={() => navigate(`/challans/${challan.id}/edit`)}
-                  className="premium-btn-secondary py-2"
-                >
-                  <Edit className="w-4 h-4" /> Edit Items
-                </button>
+        <div className="flex items-center gap-2">
+          {/* Export PDF Button is always visible */}
+          <button
+            onClick={() => exportChallanToPDF(challan)}
+            className="premium-btn-secondary py-2 text-navy-900 border-navy-200 hover:bg-navy-50"
+          >
+            <Download className="w-4 h-4" /> Export PDF
+          </button>
+
+          {isWritable && (
+            <>
+              {challan.status === 'Draft' && (
+                <>
+                  <button
+                    onClick={() => navigate(`/challans/${challan.id}/edit`)}
+                    className="premium-btn-secondary py-2"
+                  >
+                    <Edit className="w-4 h-4" /> Edit Items
+                  </button>
+                  <button
+                    disabled={actionSubmitting}
+                    onClick={() => setShowConfirmModal(true)}
+                    className="premium-btn-primary py-2"
+                  >
+                    <CheckCircle className="w-4 h-4" /> Confirm & Dispatch
+                  </button>
+                </>
+              )}
+
+              {(challan.status === 'Draft' || challan.status === 'Confirmed') && (
                 <button
                   disabled={actionSubmitting}
-                  onClick={() => setShowConfirmModal(true)}
-                  className="premium-btn-primary py-2"
+                  onClick={() => setShowCancelModal(true)}
+                  className="premium-btn-danger py-2"
                 >
-                  <CheckCircle className="w-4 h-4" /> Confirm & Dispatch
+                  <XCircle className="w-4 h-4 text-rose-700" /> 
+                  {challan.status === 'Confirmed' ? 'Cancel & Restock' : 'Cancel Challan'}
                 </button>
-              </>
-            )}
-
-            {(challan.status === 'Draft' || challan.status === 'Confirmed') && (
-              <button
-                disabled={actionSubmitting}
-                onClick={() => setShowCancelModal(true)}
-                className="premium-btn-danger py-2"
-              >
-                <XCircle className="w-4 h-4 text-rose-700" /> 
-                {challan.status === 'Confirmed' ? 'Cancel & Restock' : 'Cancel Challan'}
-              </button>
-            )}
-          </div>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {actionError && (
