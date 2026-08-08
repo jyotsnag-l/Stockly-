@@ -1,118 +1,559 @@
 <div align="center">
 
 # Stockly
-### Run your business with clarity
 
-A full-stack ERP + CRM operations portal for wholesale/distribution businesses — built to unify sales, warehouse, and accounts teams around one source of truth.
+**Run your business with clarity.**
+
 </div>
+
+**Stockly** is a full-stack **ERP + CRM operations portal** built for wholesale and distribution businesses.
+
+It brings **Sales, Warehouse, Accounts, and Admin** onto one shared system — replacing disconnected spreadsheets with a single source of truth for customers, inventory, and sales operations.
 
 ---
 
-## Overview
+##  What is Stockly?
 
-Stockly is a full-stack monorepo — a **Node.js + Express + TypeScript** backend with **Prisma ORM**, and a **Vite + React + TypeScript** frontend styled with **Tailwind CSS**. It provides role-based authentication, an interactive customer relations timeline, product and inventory tracking, and transactional sales challans with built-in stock-safety checks.
+Stockly connects the complete daily sales workflow:
 
-## Table of Contents
+```text
+┌─────────────┐
+│   Customer  │
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│     CRM     │  → Leads, follow-ups, relationship history
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│ Sales Order │
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│   Challan   │  → Delivery note with product snapshots
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│ Stock Check │  → Prevents overselling
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│ Stock Update│  → Atomic inventory movement
+└──────┬──────┘
+       ↓
+┌─────────────┐
+│   Audit     │  → Complete stock movement history
+└─────────────┘
+```
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Architecture Explanation](#architecture-explanation)
-- [Environment Variables](#environment-variables)
-- [Local Setup Instructions](#local-setup-instructions)
-- [Test Login Credentials](#test-login-credentials)
-- [Known Limitations & Incomplete Parts](#known-limitations--incomplete-parts)
-- [Deployment Notes](#deployment-notes)
+The goal is simple:
 
-## Features
+> **Sales knows what is in stock. Warehouse knows what is being sold. Accounts sees what actually happened.**
 
-- **Role-based authentication** — JWT-secured access for Admin, Sales, Warehouse, and Accounts roles, each with scoped read/write permissions
-- **Customer CRM** — customer records with lead/active/inactive status, search and filtering, and a follow-up notes timeline
-- **Product & inventory management** — product catalog with SKU tracking, low-stock alerts, and a full stock movement audit log (IN/OUT, reason, actor, timestamp)
-- **Sales challans** — multi-product challans with auto-generated challan numbers, draft/confirm/cancel states, and atomic stock deduction on confirmation
-- **Stock safety checks** — inventory can never go negative; insufficient-stock attempts are rejected with a clear error before any data is written
+---
 
-## Tech Stack
+# 🚀 Core Features
 
-| Layer | Technology |
-|---|---|
-| Backend | Node.js, Express, TypeScript |
-| ORM / DB | Prisma, PostgreSQL (Supabase) |
-| Auth | JWT |
-| Frontend | React, TypeScript, Vite |
-| Styling | Tailwind CSS |
+### 👥 Customer CRM
 
-## Architecture Explanation
+* Lead and active customer tracking
+* Customer relationship timeline
+* Follow-up notes and interaction history
+* Customer-specific operational context
 
-### 1. Why Prisma?
-Prisma provides type-safe query interfaces, an auto-generated client, and managed migration files. Any change to the PostgreSQL schema is synced safely and reflected immediately as strict TypeScript definitions across the backend endpoints.
+### 📦 Inventory Management
 
-### 2. Why the Transaction Approach for Stock/Challan Confirmation?
-Confirming a challan requires subtracting items from product inventory. To avoid race conditions — e.g. two operators confirming dispatches simultaneously for the same limited-stock item — the checks are wrapped in a **Prisma transaction**. Each product's active stock is queried *inside* the transaction block. If any item has insufficient quantity, the whole transaction rolls back, preventing negative inventory counts.
+* Product catalogue
+* Real-time stock quantities
+* Stock movement tracking
+* Complete inventory audit trail
+* Protection against negative inventory
 
-### 3. Why Snapshot Fields on ChallanItem?
-Product pricing, names, and SKUs naturally change over time. Linking challans only to live products would let a later product edit retroactively corrupt old delivery records. Capturing a static snapshot — `productNameSnapshot`, `productSkuSnapshot`, `unitPriceSnapshot` — inside `ChallanItem` at creation time keeps sales valuation and historical records permanently accurate.
+### 🧾 Sales Challans
 
-### 4. What Was Skipped / Simplified?
-- **User profile management** — kept admin-only, no self-service registration; roles are seeded directly via script to keep the user set controlled for this submission.
-- **Natural-language search** — deprioritized in favor of the core transactional operations (atomic stock movements and sequential challans).
+* Create and manage sales challans
+* Stock validation before confirmation
+* Automatic inventory deduction
+* Sequential challan records
+* Historical product and pricing snapshots
 
-## Environment Variables
+### 🔐 Role-Based Access
 
-The backend reads the following from `.env`:
+Different teams get access to only the operations they need.
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | Supabase PostgreSQL connection string (pooled, transaction mode, port 6543) — used by the app client |
-| `DIRECT_URL` | Supabase PostgreSQL connection string (direct, session mode, port 5432) — used for running migrations |
-| `JWT_SECRET` | Random string used to sign and verify auth tokens |
-| `PORT` | Port the backend listens on (default `5000`) |
-| `FRONTEND_URL` | CORS-allowed origin (default `http://localhost:5173`) |
+| Role                  | Access                                   |
+| --------------------- | ---------------------------------------- |
+| **System Admin**      | Full system access + user management     |
+| **Sales Executive**   | Customers & Challans, read-only Products |
+| **Warehouse Manager** | Products & Challans, read-only Customers |
+| **Accountant**        | Read-only auditing access                |
 
-## Local Setup Instructions
+---
 
-Requires **Node.js v18+** and **npm**.
+# 🛡️ Built for Data Integrity
 
-**1. Install dependencies** (from the root directory)
+Stockly isn't just a collection of CRUD screens.
+
+The most critical operations are designed around **transactional safety and historical accuracy**.
+
+### 1. Atomic Stock Transactions
+
+When a challan is confirmed, Stockly needs to:
+
+1. Check available stock
+2. Validate every item
+3. Deduct inventory
+4. Record the stock movement
+5. Complete the challan confirmation
+
+These operations run inside a **Prisma database transaction**.
+
+```text
+Challan Confirmation
+        │
+        ▼
+┌──────────────────────┐
+│ Start Transaction    │
+└──────────┬───────────┘
+           ▼
+┌──────────────────────┐
+│ Check Current Stock  │
+└──────────┬───────────┘
+           │
+      ┌────┴────┐
+      │ Enough? │
+      └────┬────┘
+       Yes │ No
+           │  └──────────────► ROLLBACK
+           ▼
+┌──────────────────────┐
+│ Deduct Inventory     │
+└──────────┬───────────┘
+           ▼
+┌──────────────────────┐
+│ Record Stock Movement│
+└──────────┬───────────┘
+           ▼
+┌──────────────────────┐
+│ Confirm Challan      │
+└──────────────────────┘
+```
+
+This prevents situations such as:
+
+* Negative stock
+* Partial inventory updates
+* Inconsistent challans
+* Race conditions during simultaneous dispatches
+
+---
+
+### 2. Historical Product Snapshots
+
+Products change.
+
+Prices change.
+Names change.
+SKUs change.
+
+Historical challans shouldn't.
+
+Instead of relying only on the current Product record, each `ChallanItem` stores:
+
+```text
+productNameSnapshot
+productSkuSnapshot
+unitPriceSnapshot
+```
+
+So if a product changes from:
+
+```text
+Product: Premium Rice
+SKU: RICE-001
+Price: ₹1,200
+```
+
+to:
+
+```text
+Product: Premium Basmati Rice
+SKU: RICE-001B
+Price: ₹1,450
+```
+
+an old challan still retains the original information.
+
+**Result:** historical sales records remain accurate and auditable.
+
+---
+
+# 🏗️ Architecture
+
+Stockly follows a clean full-stack architecture:
+
+```text
+                    ┌─────────────────────┐
+                    │     React Frontend  │
+                    │  Vite + TypeScript  │
+                    └──────────┬──────────┘
+                               │
+                          REST API
+                               │
+                    ┌──────────▼──────────┐
+                    │   Express Backend   │
+                    │ Node + TypeScript   │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │   Prisma ORM        │
+                    │ Type-safe queries   │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │ PostgreSQL /        │
+                    │ Supabase Database   │
+                    └─────────────────────┘
+```
+
+### Backend flow
+
+```text
+Routes
+  ↓
+Middleware
+  ↓
+Controllers
+  ↓
+Services
+  ↓
+Prisma
+  ↓
+PostgreSQL
+```
+
+### Frontend structure
+
+```text
+Pages
+  ↓
+Components / Context
+  ↓
+API Layer
+  ↓
+Backend REST APIs
+```
+
+---
+
+# 🧰 Tech Stack
+
+| Layer                 | Technology         |
+| --------------------- | ------------------ |
+| **Frontend**          | React + TypeScript |
+| **Build Tool**        | Vite               |
+| **Styling**           | Tailwind CSS       |
+| **Backend**           | Node.js + Express  |
+| **Language**          | TypeScript         |
+| **ORM**               | Prisma             |
+| **Database**          | PostgreSQL         |
+| **Database Platform** | Supabase           |
+| **Authentication**    | JWT                |
+| **API Testing**       | Postman            |
+
+---
+
+# 📁 Project Structure
+
+```text
+Stockly/
+│
+├── backend/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   │
+│   └── src/
+│       ├── controllers/
+│       ├── middleware/
+│       ├── routes/
+│       ├── services/
+│       └── server.ts
+│
+├── frontend/
+│   └── src/
+│       ├── api/
+│       ├── components/
+│       ├── context/
+│       ├── pages/
+│       ├── App.tsx
+│       └── main.tsx
+│
+├── postman_collection.json
+├── postman_environment.json
+├── package.json
+└── README.md
+```
+
+---
+
+# 🔐 Role-Based Access
+
+Stockly uses role-based authentication to keep operational responsibilities separated.
+
+### System Admin
+
+**Full access**
+
+* Users
+* Customers
+* Products
+* Challans
+* Dashboard
+
+### Sales Executive
+
+**Customer & sales focused**
+
+* Create/update customers
+* Manage follow-ups
+* Create/manage challans
+* View products
+
+### Warehouse Manager
+
+**Inventory focused**
+
+* Manage products
+* Manage stock
+* Process challans
+* View customers
+
+### Accountant
+
+**Audit focused**
+
+* Read-only access
+* View customers
+* View products
+* Audit challans and operational records
+
+---
+
+# 🧠 Why Prisma?
+
+Prisma provides:
+
+* Type-safe database queries
+* Auto-generated TypeScript client
+* Schema-driven development
+* Migration management
+* Better consistency between the database and backend types
+
+This means database changes can be reflected safely across the backend rather than relying on loosely typed SQL queries.
+
+---
+
+### Variable purpose
+
+| Variable       | Purpose                                   |
+| -------------- | ----------------------------------------- |
+| `DATABASE_URL` | Pooled Supabase PostgreSQL connection     |
+| `DIRECT_URL`   | Direct database connection for migrations |
+| `JWT_SECRET`   | Signs and verifies JWT tokens             |
+| `PORT`         | Backend server port                       |
+| `FRONTEND_URL` | Allowed frontend origin for CORS          |
+
+> **Never commit your actual `.env` file or database credentials to GitHub.**
+
+---
+
+# 💻 Local Setup
+
+### Prerequisites
+
+* Node.js **18+**
+* npm
+* PostgreSQL / Supabase database
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repository-url>
+cd Stockly
+```
+
+### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
-**2. Configure environment files**
+### 3. Configure environment
+
 ```bash
 cd backend
 cp .env.example .env
 ```
-Populate `.env` with your Supabase pooled URL under `DATABASE_URL`, direct URL under `DIRECT_URL`, and a `JWT_SECRET`.
 
-**3. Apply migrations & seed data**
+Add your database credentials and JWT secret.
+
+### 4. Generate Prisma Client & run migrations
+
 ```bash
-# Generate Prisma Client & run migrations
 npx prisma migrate dev
+```
 
-# Seed default users, products, and customers
+### 5. Seed the database
+
+```bash
 npx prisma db seed
 ```
 
-**4. Start development servers** (from the root directory)
+This creates the default users, products, and customers.
+
+### 6. Start the backend
+
+From the root:
+
 ```bash
-npm run dev:backend    # http://localhost:5000
-npm run dev:frontend   # http://localhost:5173
+npm run dev:backend
 ```
 
-## Test Login Credentials
+Backend:
 
-| Role | Email | Password | Allowed Operations |
-|---|---|---|---|
-| System Admin | `admin@erp.com` | `Password123` | Full access to all modules, including Users |
-| Sales Executive | `sales@erp.com` | `Password123` | Read/write Customers & Challans, read-only Products |
-| Warehouse Manager | `warehouse@erp.com` | `Password123` | Read/write Products & Challans, read-only Customers |
-| Accountant | `accounts@erp.com` | `Password123` | Read-only auditing access across all tables |
+```text
+http://localhost:5000
+```
 
-## Known Limitations & Incomplete Parts
+### 7. Start the frontend
 
-- **No PDF export** — challans are viewable on the detail panel UI only, not downloadable as PDF
-- **Silent session expiry** — token expiry (8h) redirects to login without an advance-warning notification
+In another terminal:
 
-## Deployment Notes
+```bash
+npm run dev:frontend
+```
 
-The application is configured to run locally. Cloud hosting was skipped for this submission because serverless database pool connections introduce cold-start latency that can interfere with the atomic transaction checks in the challan-confirmation flow.
+Frontend:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# 🔑 Test Accounts
+
+| Role      | Email               | Password      |
+| --------- | ------------------- | ------------- |
+| Admin     | `admin@erp.com`     | `Password123` |
+| Sales     | `sales@erp.com`     | `Password123` |
+| Warehouse | `warehouse@erp.com` | `Password123` |
+| Accounts  | `accounts@erp.com`  | `Password123` |
+
+> These credentials are intended for local/demo use only.
+
+---
+
+# 📮 API Testing
+
+A ready-to-use Postman collection and environment are included:
+
+```text
+postman_collection.json
+postman_environment.json
+```
+
+Import both into Postman to test the backend APIs.
+
+---
+
+# 📌 Simplifications
+
+To keep the project focused on its core transactional workflow, some features were intentionally simplified.
+
+### User Management
+
+User accounts are seeded through Prisma rather than allowing public registration.
+
+This prevents uncontrolled creation of privileged roles such as:
+
+* Admin
+* Warehouse
+* Accounts
+
+### Natural Language Search
+
+An experimental natural-language search feature was intentionally left out of the final implementation to prioritize:
+
+* Atomic stock operations
+* Challan integrity
+* Role-based access
+* Core ERP workflows
+
+---
+
+# ⚠️ Known Limitations
+
+* **No PDF Export**
+  Challans are currently viewed through the detail UI and cannot be exported as PDFs.
+
+* **Session Expiry Notification**
+  JWT tokens expire after 8 hours. The application redirects users to login after expiry but does not currently provide an advance warning.
+
+* **Local Deployment**
+  The submission is configured primarily for local execution rather than cloud deployment.
+
+---
+
+# 🔮 Future Improvements
+
+Potential extensions include:
+
+* PDF challan generation
+* Low-stock alerts
+* Advanced sales analytics
+* Invoice generation
+* Payment tracking
+* Supplier management
+* Purchase order workflows
+* Email/WhatsApp follow-up reminders
+* Advanced reporting dashboards
+* Natural-language business search
+* Cloud deployment
+
+---
+
+# 🎯 Design Philosophy
+
+Stockly is built around one principle:
+
+> **Every team should work from the same operational truth.**
+
+Instead of:
+
+```text
+Sales → Spreadsheet
+Warehouse → Spreadsheet
+Accounts → Spreadsheet
+        ↓
+   Manual Reconciliation
+```
+
+Stockly provides:
+
+```text
+             ┌───────────┐
+             │  Stockly  │
+             └─────┬─────┘
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+    Sales      Warehouse    Accounts
+       │           │           │
+       └───────────┼───────────┘
+                   ↓
+          One Source of Truth
+```
+
+**Stockly — Run your business with clarity.**
