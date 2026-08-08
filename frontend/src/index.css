@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #F7F6F2;
+    color: #17212B;
+    font-family: 'Plus Jakarta Sans', 'DM Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom scrollbar for modern looks */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+@layer components {
+  /* Reusable Layout Tokens */
+  .premium-card {
+    @apply bg-white rounded-xl border border-border-brand p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:shadow-md hover:border-brand-200 transition-all duration-300;
+  }
+
+  .premium-input {
+    @apply w-full px-3.5 py-2.5 border border-border-brand rounded-xl text-sm text-text-primary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-150 disabled:bg-gray-50 disabled:text-gray-400;
+  }
+
+  .premium-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .premium-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-border-brand bg-white hover:bg-gray-50 text-text-primary px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .premium-btn-danger {
+    @apply inline-flex items-center justify-center gap-2 border border-danger-brand hover:bg-rose-50 text-danger-brand px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .premium-badge-info {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-navy-50 text-navy-900 border border-navy-100;
+  }
+
+  .premium-badge-warning {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-warning-brand border border-amber-200;
+  }
+
+  .premium-badge-success {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-light text-emerald-brand border border-brand-200;
+  }
+
+  .premium-badge-danger {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-danger-brand border border-rose-200;
+  }
+  
+  /* Table components styling */
+  .premium-th {
+    @apply px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider bg-gray-50/50 border-b border-border-brand;
+  }
+
+  .premium-td {
+    @apply px-6 py-4 text-sm text-text-primary border-b border-border-brand;
+  }
+
+  /* Table loading skeletons */
+  .skeleton-cell {
+    @apply h-4 bg-gray-200 rounded animate-pulse;
+  }
+}
+
+/* Splash Screen Animations */
+@keyframes splash-fade-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splash-fade-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-container-fade-out {
+  0%, 90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-splash-logo {
+  animation: splash-fade-scale-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-splash-wordmark {
+  opacity: 0;
+  animation: splash-fade-slide-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+}
+
+.animate-splash-tagline {
+  opacity: 0;
+  animation: splash-fade-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+
+.animate-splash-container {
+  animation: splash-container-fade-out 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}

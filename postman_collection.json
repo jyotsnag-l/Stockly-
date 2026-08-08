@@ -1,0 +1,626 @@
+{
+	"info": {
+		"_postman_id": "8b5f6312-ea33-4f9e-a89e-cbde8f47b6a1",
+		"name": "Stockly API Collection",
+		"description": "Collection covering Authentication, Customer relations, Product inventory management, Sales Challans, and Dashboard metrics.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "POST Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"    console.log(\"Token automatically stored in environment variable: token\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"sales@erp.com\",\n    \"password\": \"Password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Exchanges credentials for JWT token and saves it in the environment variable. Default seeded accounts passwords are all Password123."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "GET Customers (Paginated & Filtered)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers?page=1&limit=10&search=&status=Active&customerType=Wholesale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": "Active"
+								},
+								{
+									"key": "customerType",
+									"value": "Wholesale"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Wayne Enterprises\",\n    \"email\": \"bruce@wayne.co\",\n    \"mobile\": \"+1 8456291986\",\n    \"businessName\": \"Wayne Corp\",\n    \"gstNumber\": \"22WAYNE0000W1Z1\",\n    \"customerType\": \"Wholesale\",\n    \"address\": \"1007 Mountain Drive, Gotham City\",\n    \"status\": \"Active\",\n    \"followUpDate\": \"2026-08-15\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Customer Details By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers/PASTE_CUSTOMER_ID_HERE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers",
+								"PASTE_CUSTOMER_ID_HERE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Edit Customer Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Bruce Wayne\",\n    \"email\": \"bruce.wayne@wayne.com\",\n    \"mobile\": \"+1 8456291986\",\n    \"businessName\": \"Wayne Industries\",\n    \"gstNumber\": \"22WAYNE0000W1Z1\",\n    \"customerType\": \"Wholesale\",\n    \"address\": \"Gotham Manor, Gotham\",\n    \"status\": \"Active\",\n    \"followUpDate\": \"2026-09-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers/PASTE_CUSTOMER_ID_HERE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers",
+								"PASTE_CUSTOMER_ID_HERE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Add Customer Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"Discussed wholesale supply terms for the new monitor inventory batch. Next meeting scheduled next week.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers/PASTE_CUSTOMER_ID_HERE/notes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customers",
+								"PASTE_CUSTOMER_ID_HERE",
+								"notes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "GET Products (Paginated & Filtered)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=1&limit=10&search=&category=Peripherals&lowStock=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "category",
+									"value": "Peripherals"
+								},
+								{
+									"key": "lowStock",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Logitech MX Keys S\",\n    \"sku\": \"LOGI-MXKEYS-SLV\",\n    \"category\": \"Peripherals\",\n    \"unitPrice\": 119.99,\n    \"currentStock\": 30,\n    \"minStockAlert\": 5,\n    \"location\": \"Shelf A-3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Edit Product Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Logitech MX Keys S Premium Edition\",\n    \"sku\": \"LOGI-MXKEYS-SLV\",\n    \"category\": \"Peripherals\",\n    \"unitPrice\": 129.99,\n    \"minStockAlert\": 8,\n    \"location\": \"Shelf A-3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/PASTE_PRODUCT_ID_HERE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"PASTE_PRODUCT_ID_HERE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Log Stock Movement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantityChanged\": 15,\n    \"movementType\": \"IN\",\n    \"reason\": \"Received supplier bulk batch delivery\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/PASTE_PRODUCT_ID_HERE/stock-movement",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"PASTE_PRODUCT_ID_HERE",
+								"stock-movement"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Product Movement Logs History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products/PASTE_PRODUCT_ID_HERE/stock-movements?page=1&limit=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"PASTE_PRODUCT_ID_HERE",
+								"stock-movements"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Challans",
+			"item": [
+				{
+					"name": "GET Challans (Paginated & Filtered)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans?page=1&limit=10&status=Draft",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "Draft"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Challan (Draft)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"PASTE_CUSTOMER_ID_HERE\",\n    \"items\": [\n        {\n            \"productId\": \"PASTE_PRODUCT_ID_HERE\",\n            \"quantity\": 5\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Challan Details By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/PASTE_CHALLAN_ID_HERE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"PASTE_CHALLAN_ID_HERE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Draft Challan Items",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"productId\": \"PASTE_PRODUCT_ID_HERE\",\n            \"quantity\": 3\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans/PASTE_CHALLAN_ID_HERE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"PASTE_CHALLAN_ID_HERE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Confirm Challan (Deduct Inventory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/PASTE_CHALLAN_ID_HERE/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"PASTE_CHALLAN_ID_HERE",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Cancel Challan (Return Stock if Confirmed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/PASTE_CHALLAN_ID_HERE/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"PASTE_CHALLAN_ID_HERE",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard Stats",
+			"item": [
+				{
+					"name": "GET Dashboard Live Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
