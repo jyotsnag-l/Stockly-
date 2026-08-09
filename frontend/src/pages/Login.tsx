@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { fetchFromApi } from '../api/client';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 
 export default function Login() {
@@ -55,17 +56,10 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const data = await fetchFromApi('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed. Please check credentials.');
-      }
 
       login(data.token, data.user);
       navigate('/');

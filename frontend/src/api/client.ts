@@ -3,7 +3,7 @@
  * Connects to the Express backend via the configured Vite proxy (/api -> http://localhost:5000).
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://stockly-backend-7rik.onrender.com');
 
 export async function fetchFromApi<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
@@ -22,7 +22,7 @@ export async function fetchFromApi<T = any>(endpoint: string, options?: RequestI
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `API Error: ${response.status} ${response.statusText}`);
+    throw new Error(errorData.error || errorData.message || `API Error: ${response.status} ${response.statusText}`);
   }
 
   return response.json();
