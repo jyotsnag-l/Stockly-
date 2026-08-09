@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { formatCurrency } from '../utils/format';
 import { 
   getProducts, 
   createProduct, 
@@ -332,7 +333,7 @@ export default function Products() {
                           </span>
                         </td>
                         <td className="premium-td font-bold text-gray-900">
-                          ${Number(product.unitPrice).toFixed(2)}
+                          {formatCurrency(Number(product.unitPrice))}
                         </td>
                         <td className="premium-td">
                           <div className="flex items-center gap-2">
@@ -506,7 +507,7 @@ export default function Products() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Unit Price ($)</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Unit Price (₹)</label>
                     <input
                       type="number"
                       step="0.01"

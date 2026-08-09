@@ -13,7 +13,7 @@ import {
   ArrowLeft, 
   Package, 
   Tag, 
-  DollarSign, 
+  IndianRupee, 
   AlertTriangle, 
   History, 
   PlusCircle, 
@@ -22,6 +22,7 @@ import {
   User, 
   AlertCircle 
 } from 'lucide-react';
+import { formatCurrency } from '../utils/format';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -215,10 +216,10 @@ export default function ProductDetail() {
             {/* Product Meta details */}
             <div className="space-y-4 text-sm text-gray-600">
               <div className="flex gap-3">
-                <DollarSign className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.5" />
+                <IndianRupee className="w-4.5 h-4.5 text-gray-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Unit Sales Price</p>
-                  <p className="font-bold text-gray-800">${Number(product.unitPrice).toFixed(2)}</p>
+                  <p className="font-bold text-gray-800">{formatCurrency(Number(product.unitPrice))}</p>
                 </div>
               </div>
 

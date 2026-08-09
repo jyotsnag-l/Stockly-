@@ -146,9 +146,9 @@ export const exportChallanToPDF = (challan: Challan) => {
     return [
       item.productNameSnapshot,
       item.productSkuSnapshot,
-      `$${price.toFixed(2)}`,
+      `Rs. ${price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       `${item.quantity} units`,
-      `$${subtotal.toFixed(2)}`
+      `Rs. ${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     ];
   });
 
@@ -216,7 +216,7 @@ export const exportChallanToPDF = (challan: Challan) => {
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]); // Emerald Green
-  const valStr = `$${totalValuation.toFixed(2)}`;
+  const valStr = `Rs. ${totalValuation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   doc.text(valStr, 190 - doc.getTextWidth(valStr), finalY + 15);
 
   // Signatures Section (at the bottom, or relative if fits, otherwise on a new page or push down)

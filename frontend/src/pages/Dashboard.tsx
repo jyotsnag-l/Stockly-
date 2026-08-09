@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardData, DashboardStats, DashboardActivity } from '../api/dashboard';
 import { 
-  DollarSign, 
+  IndianRupee, 
   Users, 
   Package, 
   FileText, 
@@ -10,6 +10,7 @@ import {
   Database,
   AlertCircle
 } from 'lucide-react';
+import { formatCurrency } from '../utils/format';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -38,14 +39,6 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(val);
-  };
 
   const getRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -145,7 +138,7 @@ export default function Dashboard() {
       trendText: '↑ 12.4%',
       trendSub: 'vs last month',
       isPositive: true,
-      icon: DollarSign
+      icon: IndianRupee
     },
     {
       title: 'ACTIVE CUSTOMERS',

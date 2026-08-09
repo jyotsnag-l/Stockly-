@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchFromApi } from '../api/client';
+import { formatCurrency } from '../utils/format';
 import { 
   createChallan, 
   updateChallan, 
@@ -253,7 +254,7 @@ export default function ChallanForm() {
           <div className="flex items-center justify-end">
             <div className="text-right">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Estimated Total</p>
-              <p className="text-3xl font-extrabold text-brand-600 tracking-tight">${runningTotal.toFixed(2)}</p>
+              <p className="text-3xl font-extrabold text-brand-600 tracking-tight">{formatCurrency(runningTotal)}</p>
             </div>
           </div>
         </div>
@@ -328,7 +329,7 @@ export default function ChallanForm() {
 
                   <div className="w-full sm:w-24 text-right space-y-1">
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Subtotal</p>
-                    <p className="text-xs font-bold text-gray-800 py-2">${total.toFixed(2)}</p>
+                    <p className="text-xs font-bold text-gray-800 py-2">{formatCurrency(total)}</p>
                   </div>
 
                   <div className="flex justify-end pt-2 sm:pt-0">

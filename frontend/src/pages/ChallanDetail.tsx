@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { formatCurrency } from '../utils/format';
 import { 
   getChallanById, 
   confirmChallan, 
@@ -310,13 +311,13 @@ export default function ChallanDetail() {
                           {item.productSkuSnapshot}
                         </td>
                         <td className="px-4 py-3 font-bold">
-                          ${price.toFixed(2)}
+                          {formatCurrency(price)}
                         </td>
                         <td className="px-4 py-3 text-gray-800 font-bold">
                           {item.quantity} units
                         </td>
                         <td className="px-4 py-3 text-right text-gray-900 font-extrabold">
-                          ${subtotal.toFixed(2)}
+                          {formatCurrency(subtotal)}
                         </td>
                       </tr>
                     );
@@ -333,7 +334,7 @@ export default function ChallanDetail() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-400">Challan Valuation</p>
-                <p className="text-2xl font-extrabold text-brand-600 tracking-tight">${invoiceTotal.toFixed(2)}</p>
+                <p className="text-2xl font-extrabold text-brand-600 tracking-tight">{formatCurrency(invoiceTotal)}</p>
               </div>
             </div>
           </div>
