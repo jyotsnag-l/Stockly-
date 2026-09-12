@@ -68,7 +68,7 @@ app.use('/dashboard', authenticate, dashboardRouter);
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the ERP CRM Portal API',
-    version: '1.0.0',
+    version: '1.0.1',
     documentation: 'See README for API usage and setup.'
   });
 });

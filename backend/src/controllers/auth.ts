@@ -43,35 +43,35 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const normalizedEmail = email.toLowerCase().trim();
+  const demoAccount = DEMO_USERS[normalizedEmail];
 
+  let user: any = null;
+
+  // Try fetching from Database with isolated error handling
   try {
-    let user: any = null;
+    user = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+  } catch (dbErr) {
+    console.warn('[Auth] DB lookup failed, falling back to demo account:', dbErr instanceof Error ? dbErr.message : dbErr);
+  }
 
-    try {
-      user = await prisma.user.findUnique({
-        where: { email: normalizedEmail }
-      });
-    } catch (dbErr) {
-      console.warn('[Auth] Database connection check failed, using demo account fallback:', dbErr instanceof Error ? dbErr.message : dbErr);
+  // Fallback to demo credentials if user not found in DB or DB is offline
+  if (!user && demoAccount) {
+    if (password === 'Password123' || password === 'admin' || password === '123456') {
+      user = demoAccount;
     }
+  }
 
-    if (user) {
+  if (user) {
+    // Validate password for non-demo users if passwordHash exists
+    if (user.passwordHash && !DEMO_USERS[normalizedEmail]) {
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       if (!isPasswordValid) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
-    } else {
-      const demoAccount = DEMO_USERS[normalizedEmail];
-      if (demoAccount && (password === 'Password123' || password === 'admin' || password === '123456')) {
-        user = demoAccount;
-      }
     }
 
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Generate JWT Token
     const jwtSecret = process.env.JWT_SECRET || 'super-secret-key-erp-crm-portal-2026-xyz';
     const token = jwt.sign(
       { 
@@ -83,7 +83,6 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '8h' }
     );
 
-    // Return token and user details
     return res.json({
       token,
       user: {
@@ -93,31 +92,9 @@ export const login = async (req: Request, res: Response) => {
         role: user.role
       }
     });
-  } catch (error) {
-    const demoAccount = DEMO_USERS[normalizedEmail];
-    if (demoAccount && (password === 'Password123' || password === 'admin')) {
-      const jwtSecret = process.env.JWT_SECRET || 'super-secret-key-erp-crm-portal-2026-xyz';
-      const token = jwt.sign(
-        { userId: demoAccount.id, role: demoAccount.role, email: demoAccount.email },
-        jwtSecret,
-        { expiresIn: '8h' }
-      );
-      return res.json({
-        token,
-        user: {
-          id: demoAccount.id,
-          name: demoAccount.name,
-          email: demoAccount.email,
-          role: demoAccount.role
-        }
-      });
-    }
-
-    return res.status(500).json({ 
-      error: 'Login failed', 
-      message: error instanceof Error ? error.message : 'Unknown error' 
-    });
   }
+
+  return res.status(401).json({ error: 'Invalid email or password' });
 };
 
 /**
