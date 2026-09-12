@@ -57,7 +57,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     // Merge activities into a single timeline array
     const activities: any[] = [];
 
-    recentCustomers.forEach((c) => {
+    recentCustomers.forEach((c: any) => {
       activities.push({
         id: `customer-${c.id}`,
         type: 'customer',
@@ -68,7 +68,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       });
     });
 
-    recentMovements.forEach((m) => {
+    recentMovements.forEach((m: any) => {
       activities.push({
         id: `movement-${m.id}`,
         type: 'product',
@@ -79,9 +79,9 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       });
     });
 
-    recentChallans.forEach((ch) => {
+    recentChallans.forEach((ch: any) => {
       const amount = ch.items.reduce(
-        (sum, item) => sum + Number(item.unitPriceSnapshot) * item.quantity, 
+        (sum: number, item: any) => sum + Number(item.unitPriceSnapshot) * item.quantity, 
         0
       );
       activities.push({

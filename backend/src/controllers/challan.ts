@@ -262,7 +262,7 @@ export const updateChallan = async (req: Request, res: Response) => {
     }
 
     // 3. Clear previous items and record new ones inside a Transaction
-    const updatedChallan = await prisma.$transaction(async (tx) => {
+    const updatedChallan = await prisma.$transaction(async (tx: any) => {
       // A. Delete existing items
       await tx.challanItem.deleteMany({ where: { challanId: id } });
 
@@ -315,7 +315,7 @@ export const confirmChallan = async (req: Request, res: Response) => {
 
   try {
     // Execute atomic validations inside a Prisma Transaction
-    const response = await prisma.$transaction(async (tx) => {
+    const response = await prisma.$transaction(async (tx: any) => {
       // 1. Fetch Challan details
       const challan = await tx.challan.findUnique({
         where: { id },
@@ -428,7 +428,7 @@ export const cancelChallan = async (req: Request, res: Response) => {
   const userId = authReq.user.userId;
 
   try {
-    const response = await prisma.$transaction(async (tx) => {
+    const response = await prisma.$transaction(async (tx: any) => {
       // 1. Fetch Challan details
       const challan = await tx.challan.findUnique({
         where: { id },

@@ -65,7 +65,7 @@ export const getProducts = async (req: Request, res: Response) => {
     // In-memory filter for lowStock (ensures safety across all database types/configs)
     let filtered = allMatching;
     if (lowStock) {
-      filtered = allMatching.filter((p) => p.currentStock <= p.minStockAlert);
+      filtered = allMatching.filter((p: any) => p.currentStock <= p.minStockAlert);
     }
 
     // Apply pagination
@@ -261,7 +261,7 @@ export const createStockMovement = async (req: Request, res: Response) => {
 
   try {
     // Execute atomic operations inside a Prisma Transaction
-    const response = await prisma.$transaction(async (tx) => {
+    const response = await prisma.$transaction(async (tx: any) => {
       const product = await tx.product.findUnique({ where: { id } });
       
       if (!product) {
